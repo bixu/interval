@@ -1,0 +1,32 @@
+#!{{pkgPathFor "core/bash"}}/bin/bash
+
+set -e
+
+exec 2>&1
+
+while true
+do
+  frequency={{cfg.frequency}}
+  current_datestamp=$(date +%s)
+  checkpoint_datestamp=$(cat {{pkg.svc_var_path}}/checkpoint)
+  checkpoint_age=$(($current_datestamp - $checkpoint_datestamp))
+  splay=$(shuf -i1-{{cfg.splay}} -n1)
+  splayed_sleep=$(($frequency + $splay))
+
+  if [ $checkpoint_age -ge {{cfg.interval}} ]
+  then
+    echo "More than $splayed_sleep seconds have passed since our last action."
+    {{cfg.action}}
+
+    if [ $? -eq 0 ]
+    then
+      echo 'Writing new checkpoint value'
+      echo -n $(date +%s) > '{{pkg.svc_var_path}}/checkpoint'
+    fi
+
+  fi
+
+echo "Waiting for interval of $splayed_sleep seconds before next action..."
+sleep $splayed_sleep
+
+done

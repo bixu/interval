@@ -1,0 +1,4 @@
+action = "echo \"Doing ACTION at $(date)\""
+frequency = 5 # how often should we poll our last checkpoint
+interval = 5  # minimum time in seconds to wait between actions
+splay = 30    # random number of seconds to added to polling frequency to prevent stampeding herd effects
